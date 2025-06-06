@@ -63,6 +63,6 @@ def send_email(html,destinatario,assunto):
 if __name__ == '__main__':
 
     send_email('emailpersonalizado.html', # modelo HTML
-            'limao.smart@gmail.com', # Destinatario
+            'exemplo@exemplo.com', # Destinatario
             'Curriculo - Diego Santos'# Assunto 
             )
