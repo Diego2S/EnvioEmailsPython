@@ -5,40 +5,64 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
-load_dotenv()
 
-print('Enviando email...')
+def send_email(html,destinatario,assunto):
 
-CAMINHA_HTML = pathlib.Path(__file__).parent / 'Emails_html' /'emailCurriculo.html'
+    load_dotenv()
 
-# dados do remetente e destinatario 
-remetente = os.getenv('FROM_EMAIL','')
-destinatario = remetente
-assunto = 'Assunto do email teste'
+    print('Enviando email...')
 
-#Configurando SMTP
-smtp_server = 'smtp.gmail.com'
-smtp_port = 587
-smtp_username = os.getenv('FROM_EMAIL','')
-smtp_password = os.getenv('EMAIL_PASSWORD','')
+    CAMINHA_HTML = pathlib.Path(__file__).parent / 'Emails_html' /f'{html}'
 
-# Mensagem de Texto
-with open(CAMINHA_HTML,'r') as file:
-    texto_arquivo = file.read()
+    # dados do remetente e destinatario 
+    remetente = os.getenv('FROM_EMAIL','')
     
-# Transformando a mensagem em MINEMultipart
-mime_multipart = MIMEMultipart()
-mime_multipart['from'] = remetente
-mime_multipart['to'] = destinatario
-mime_multipart['subject'] = assunto
 
-body_email = MIMEText(texto_arquivo, 'html', 'utf-8')
-mime_multipart.attach(body_email)
+    #Configurando SMTP
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = os.getenv('FROM_EMAIL','')
+    smtp_password = os.getenv('EMAIL_PASSWORD','')
+
+    try:
+        # Mensagem de Texto
+        with open(CAMINHA_HTML,'r') as file:
+            texto_arquivo = file.read()
+            
+        # Transformando a mensagem em MINEMultipart
+        mime_multipart = MIMEMultipart()
+        mime_multipart['from'] = remetente
+        mime_multipart['to'] = destinatario
+        mime_multipart['subject'] = assunto
+
+        body_email = MIMEText(texto_arquivo, 'html', 'utf-8')
+        mime_multipart.attach(body_email)
+    
+    except FileNotFoundError:
+        print(f'❌ Arquivo HTML "{html}" não encontrado.')
+        return
+    except Exception as e:
+        print(f'❌ Erro ao preparar o e-mail: {e}')
+        return
+
+    try:
+
+        with smtplib.SMTP(smtp_server,smtp_port) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(smtp_username,smtp_password)
+            server.send_message(mime_multipart)
+            print(f'✅ Email para ({destinatario})enviado com sucesso!')
+    except smtplib.SMTPAuthenticationError:
+        print('❌ Falha de autenticação. Verifique o e-mail e a senha.')
+    except Exception as e:
+        print(f'❌ Erro ao enviar o e-mail: {e}')
 
 
-with smtplib.SMTP(smtp_server,smtp_port) as server:
-    server.ehlo()
-    server.starttls()
-    server.login(smtp_username,smtp_password)
-    server.send_message(mime_multipart)
-    print('Email enviado com sucesso!')
+
+if __name__ == '__main__':
+
+    send_email('emailpersonalizado.html', # modelo HTML
+            'limao.smart@gmail.com', # Destinatario
+            'Curriculo - Diego Santos'# Assunto 
+            )
