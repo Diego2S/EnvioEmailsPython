@@ -62,7 +62,9 @@ def send_email(html,destinatario,assunto):
 
 if __name__ == '__main__':
 
-    send_email('emailpersonalizado.html', # modelo HTML
-            'exemplo@exemplo.com', # Destinatario
+    for destinatario in ['',
+              ""]:
+        send_email('emailpersonalizado.html', # modelo HTML
+            destinatario, # Destinatario
             'Curriculo - Diego Santos'# Assunto 
             )
